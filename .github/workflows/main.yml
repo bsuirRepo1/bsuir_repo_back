@@ -20,4 +20,4 @@ jobs:
 
       - name: Check with flake8
         run: |
-           flake8 bsuir_repo_core --exclude=venv/
+           flake8 --exclude=.venv/
