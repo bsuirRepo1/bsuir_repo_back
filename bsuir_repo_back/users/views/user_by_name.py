@@ -15,20 +15,19 @@ class UserByNameView(GenericAPIView):
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser]
 
     @action(detail=True, methods=['GET'], url_path='users/(?P<username>[^/]+)')
-    def user_by_name(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
+    def get(self, request, *args, **kwargs):
         username = kwargs.get('username')
 
-        try:
-            user = (User.objects.filter(username=username)
-                    .select_related('userprofile')
-                    .only('id', 'username', 'email', 'date_joined'))
+        user = (User.objects.filter(username=username)
+                .select_related('userprofile')
+                .only('id', 'username', 'email', 'date_joined')
+                .first())
 
-            return Response(UserSerializer(user).data)
-        except User.DoesNotExist:
+        if user is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serialized_user = UserSerializer(user)
+        return Response(serialized_user.data)
 
 
 UserByNameView = apply_swagger_auto_schema(
