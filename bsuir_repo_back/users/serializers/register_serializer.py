@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from users.models.user import User
 from users.models.profile import UserProfile
-from users.tasks import send_confirm_code_to_email
+from users.tasks import send_code_to_email
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -38,7 +38,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
         # вешаем отправку письма на celery
-        send_confirm_code_to_email.delay(email=validated_data.get('email'))
+        send_code_to_email.delay(email=validated_data.get('email'))
 
         UserProfile.objects.create(user=user)
 
