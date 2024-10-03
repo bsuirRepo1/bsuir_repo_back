@@ -10,7 +10,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class ProfilePatchSerializer(serializers.Serializer):
-    photo = serializers.CharField(required=False)
+    photo = serializers.ImageField(required=False)
     about = serializers.CharField(required=False, max_length=1000)
     city = serializers.CharField(required=False, max_length=30)
 
