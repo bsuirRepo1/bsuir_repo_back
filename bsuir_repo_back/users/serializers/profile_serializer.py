@@ -17,6 +17,7 @@ class ProfilePatchSerializer(serializers.Serializer):
     def validate(self, attrs):
         if not any([attrs.get('about'), attrs.get('city'), attrs.get('photo')]):
             raise serializers.ValidationError("At least one field must be provided.")
+
         return attrs
 
     def update(self, instance, validated_data):
