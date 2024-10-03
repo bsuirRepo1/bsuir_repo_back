@@ -20,12 +20,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser:
-            users = UserProfile.objects.select_related('user')
+            users = UserProfile.objects.all().select_related('user')
 
             return users
 
         if not user.is_superuser:
-            profile = UserProfile.objects.filter(user=user).only('first_name', 'last_name', 'faculty')
+            profile = (UserProfile.objects.all()
+                       .filter(user=user).only('first_name', 'last_name', 'faculty'))
 
             return profile
 
