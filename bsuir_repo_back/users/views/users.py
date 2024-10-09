@@ -21,12 +21,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_superuser:
             users = (User.objects.all()
                      .select_related('userprofile')
-                     .exclude(is_blocked=True, is_superuser=True, is_active=False)
+                     .filter(is_blocked=False, is_superuser=False, is_active=True)
                      .only('id', 'username', 'email', 'date_joined'))
 
             return users
 
-        return User.objects.none()
+        return []
 
     @swagger_auto_schema(auto_schema=None)
     def create(self, request, *args, **kwargs):
