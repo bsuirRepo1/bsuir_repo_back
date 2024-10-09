@@ -54,7 +54,7 @@ class User(AbstractUser, AuditMixin):
     def validate_code(self, code: int):
         expiry_time = timezone.make_aware(datetime.now() - timedelta(minutes=self.CONFIRMATION_CODE_TIME))
         if self.code_created_at < expiry_time:
-            user = User.objects.get(code=self.code)
+            user = User.objects.get(code=code)
             if not user.is_active:
                 user.delete()
         else:
