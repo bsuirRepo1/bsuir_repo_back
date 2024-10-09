@@ -5,9 +5,10 @@ from django.utils import timezone
 from django.conf import settings
 
 from users.managers.user_manager import UserManager
+from users.mixins import AuditMixin
 
 
-class User(AbstractUser):
+class User(AbstractUser, AuditMixin):
     id = models.AutoField(primary_key=True, editable=False)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True, blank=True, null=True)

@@ -26,7 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
             return users
 
-        return User.objects.none()
+        return []
 
     @swagger_auto_schema(auto_schema=None)
     def create(self, request, *args, **kwargs):
