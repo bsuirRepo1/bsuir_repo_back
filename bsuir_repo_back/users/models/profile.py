@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.mixins import AuditMixin
+
 
 class SexChoices(models.TextChoices):
     MALE = "Мужской"
@@ -44,7 +46,7 @@ class SpecialitiesChoices(models.TextChoices):
     Radio = "Радиотехника"
 
 
-class UserProfile(models.Model):
+class UserProfile(AuditMixin):
     user = models.OneToOneField('users.User', on_delete=models.CASCADE)
     first_name = models.CharField(
         max_length=30,
