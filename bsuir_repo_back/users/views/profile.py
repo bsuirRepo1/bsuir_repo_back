@@ -2,31 +2,33 @@ from rest_framework import viewsets, status, permissions, parsers
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from users.models import User
+from bsuir_repo_core.swagger_service import apply_swagger_auto_schema
+from users.models import UserProfile
 from users.permissions import IsBlocked
-from bsuir_repo_core.swagger_service.apply_swagger_auto_schema import apply_swagger_auto_schema
-from users.serializers import UserSerializer, UserPatchSerializer
+from users.serializers.profile_serializer import ProfilePatchSerializer, ProfileSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsBlocked]
-    serializer_class = UserSerializer
+class ProfileViewSet(viewsets.ModelViewSet):
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser]
+    permissions = [permissions.IsAuthenticated, IsBlocked]
+
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return ProfilePatchSerializer
+        return ProfileSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            users = User.objects.all().select_related('userprofile')
-
-            return users
-        if not self.request.user.is_superuser:
-            users = (User.objects.all()
-                     .select_related('userprofile')
-                     .filter(is_blocked=False, is_superuser=False, is_active=True)
-                     .only('id', 'username', 'email', 'date_joined'))
+        user = self.request.user
+        if user.is_superuser:
+            users = UserProfile.objects.all().select_related('user')
 
             return users
 
-        return []
+        if not user.is_superuser:
+            profile = (UserProfile.objects.all()
+                       .filter(user=user).only('first_name', 'last_name', 'faculty'))
+
+            return profile
 
     @swagger_auto_schema(auto_schema=None)
     def create(self, request, *args, **kwargs):
@@ -44,7 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         data = request.data
 
-        serializer = UserPatchSerializer(data, instance, partial=True)
+        serializer = ProfilePatchSerializer(instance=instance, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -54,6 +56,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-UserViewSet = apply_swagger_auto_schema(
-    tags=['users'], excluded_methods=[]
-)(UserViewSet)
+ProfileViewSet = apply_swagger_auto_schema(
+    tags=['profile'], excluded_methods=[]
+)(ProfileViewSet)
