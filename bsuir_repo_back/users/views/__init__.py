@@ -6,3 +6,4 @@ from .change_password import ChangePasswordView # noqa
 from .change_password_confirm import ChangePasswordConfirmView # noqa
 from .logout import LogoutView # noqa
 from .profile import ProfileViewSet # noqa
+from .confirm_register import ConfirmRegisterView # noqa

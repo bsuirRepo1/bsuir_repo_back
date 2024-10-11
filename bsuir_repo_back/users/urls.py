@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework import routers
 
 from .views import (RegisterView, LoginView, UserViewSet, UserByNameView, ChangePasswordView, ChangePasswordConfirmView,
-                    LogoutView, ProfileViewSet)
+                    LogoutView, ProfileViewSet, ConfirmRegisterView)
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename='users')
@@ -15,4 +15,5 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('change-password-confirm/', ChangePasswordConfirmView.as_view(), name='change_password_confirm'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('confirm-register/', ConfirmRegisterView.as_view(), name='confirm-register'),
 ] + router.urls
