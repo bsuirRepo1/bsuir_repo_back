@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: backend
+    restart: always
+    command: >
+      sh -c " python manage.py makemigrations
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000"
+    container_name: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./db.sqlite3:/app/db.sqlite3
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - BROKER_URL=redis://redis:6379/0
+
+
+
+  redis:
+    restart: always
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    restart: always
+    build:
+      context: .
+    image: celery:latest
+    container_name: celery_worker
+    command: bash -c "celery -A bsuir_repo_core worker -l info"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - backend
+      - redis
+
+  flower:
+    build:
+      context: .
+    restart: always
+    image: flower
+    container_name: flower
+    ports:
+      - "5555:5555"
+    command: bash -c "celery -A bsuir_repo_core flower"
+    depends_on:
+      - celery_worker
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - BROKER_URL=redis://redis:6379/0
