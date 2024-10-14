@@ -8,6 +8,7 @@ sender_service = EmailService()
 def send_code_to_email(email: str):
     sender_service.send_code_to_email(email=email)  # отправка письма с помощью EmailService
 
+
 @shared_task()
 def send_password_to_email(email: str):
     sender_service.send_password_to_email(email=email)

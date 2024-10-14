@@ -37,9 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data.get('password'),
         )
 
+        UserProfile.objects.create(user=user)
         # вешаем отправку письма на celery
         send_code_to_email.delay(email=validated_data.get('email'))
-
-        UserProfile.objects.create(user=user)
-
         return user
