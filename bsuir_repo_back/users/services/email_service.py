@@ -21,13 +21,10 @@ class EmailService:
         return code
 
     def save_code(self, email: str, code: int):
-        user = User.objects.get(email=email)
         try:
-            if not user:
-                return None
-            else:
-                user.code = code
-                user.save()
+            user, created = User.objects.get_or_create(email=email)
+            user.code = code
+            user.save()
         except Exception as e:
             print(e)
 
