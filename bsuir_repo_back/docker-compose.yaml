@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: backend
+    restart: always
+    command: >
+      sh -c " sleep 10 &&
+              python manage.py makemigrations &&
+              python manage.py migrate && 
+              python manage.py runserver 0.0.0.0:8000"
+    container_name: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:latest
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bsuir_repo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/data/postgres
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin:/root/.pgadmin
+
+  redis:
+    restart: always
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    restart: always
+    build:
+      context: .
+    image: celery:latest
+    container_name: celery_worker
+    command: bash -c "celery -A bsuir_repo_core worker -l info"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - backend
+      - redis
+
+  flower:
+    build:
+      context: .
+    restart: always
+    image: flower
+    container_name: flower
+    ports:
+      - "5555:5555"
+    command: bash -c "celery -A bsuir_repo_core flower"
+    depends_on:
+      - celery_worker
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - BROKER_URL=redis://redis:6379/0
+
+volumes:
+  postgres:
+  pgadmin:
