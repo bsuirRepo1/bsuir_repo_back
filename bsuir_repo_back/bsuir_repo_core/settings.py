@@ -104,7 +104,10 @@ SESSION_COOKIE_HTTPONLY = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ['http://localhost:3000']
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://192.168.8.18:3500'
+]
 
 CORS_ORIGIN_WHITELIST = ('https://localhost:3000',
                          "http://localhost:3000",
@@ -112,7 +115,13 @@ CORS_ORIGIN_WHITELIST = ('https://localhost:3000',
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://192.168.8.18:3500"
 ]
+
+# CORS_ALLOW_HEADERS = [
+#     "accept-encoding", "authorization", "content-type", "origin",
+#     "user-agent", "x-csrftoken", "x-requested-with",
+# ]
 
 CORS_ALLOW_METHODS = [
     "DELETE",
