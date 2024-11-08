@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 
 from users.managers.user_manager import UserManager
-from users.mixins import AuditMixin
+from common_services.mixins.audit_mixin import AuditMixin
 
 
 class User(AbstractUser, AuditMixin):
