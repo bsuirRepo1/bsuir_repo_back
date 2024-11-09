@@ -28,11 +28,26 @@ class Repository(AuditMixin):
         }
     )
     description = models.TextField(null=False)
-    tags = models.CharField(choices=TagsChoices, default=TagsChoices.OTHERS, max_length=6, null=False)
+    tags = models.CharField(choices=TagsChoices.choices, default=TagsChoices.OTHERS, max_length=6, null=False)
     archived = models.BooleanField(default=False)
     visible = models.BooleanField(default=True)
 
-    def get_user_all_repositories(self, user_id: int):
+    @classmethod
+    def create_repository_with_files(cls, user, name, description, tags, files):
+        from .repository_file import RepositoryFile
+
+        repository = cls.objects.create(
+            user=user,
+            name=name,
+            description=description,
+            tags=tags
+        )
+        RepositoryFile.save_multiple_files(repository, files)
+
+        return repository
+
+    @staticmethod
+    def get_user_all_repositories(user_id: int):
         """
         Метод для получения всепх репозиториев конкретного пользователя
         """
