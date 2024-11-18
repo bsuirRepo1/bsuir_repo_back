@@ -11,7 +11,27 @@ class RepositoryFileSerializer(serializers.ModelSerializer):
 
 
 class RepositorySerializer(serializers.ModelSerializer):
-    files = serializers.ListField(child=serializers.FileField(allow_empty_file=False), write_only=True)
+    files = RepositoryFileSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Repository
+        fields = ['name', 'description', 'tags', 'files']
+
+    def create(self, validated_data):
+        files = validated_data.pop('files')
+        repository = Repository.create_repository_with_files(
+            user=self.context['request'].user,
+            name=validated_data['name'],
+            description=validated_data['description'],
+            tags=validated_data['tags'],
+            files=files
+        )
+
+        return repository
+
+
+class RepositoryCreateSerializer(serializers.ModelSerializer):
+    files = serializers.FileField(allow_empty_file=False, write_only=True)
 
     class Meta:
         model = Repository

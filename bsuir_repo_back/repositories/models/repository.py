@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinLengthValidator
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 
 from users.models import User
 from common_services.mixins.audit_mixin import AuditMixin
@@ -15,6 +16,7 @@ class TagsChoices(models.TextChoices):
 
 class Repository(AuditMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='repositories')
+    files = models.F
     name = models.CharField(
         max_length=70,
         validators=[MinLengthValidator(3)],
@@ -36,24 +38,23 @@ class Repository(AuditMixin):
     def create_repository_with_files(cls, user, name, description, tags, files):
         from .repository_file import RepositoryFile
 
-        repository = cls.objects.create(
-            user=user,
-            name=name,
-            description=description,
-            tags=tags
-        )
-        RepositoryFile.save_multiple_files(repository, files)
+        with transaction.atomic():
+            repository = cls.objects.create(
+                user=user,
+                name=name,
+                description=description,
+                tags=tags
+            )
+            RepositoryFile.save_multiple_files(repository, files)
 
         return repository
 
-    @staticmethod
+    @classmethod
     def get_user_all_repositories(user_id: int):
         """
         Метод для получения всепх репозиториев конкретного пользователя
         """
-        repositories = Repository.objects.filter(user_id=user_id)
-
-        return repositories
+        return Repository.objects.filter(user=user_id).prefetch_related('files')
 
     def get_specific_user_repository(self, user_id: int, repository_id: int):
         """
