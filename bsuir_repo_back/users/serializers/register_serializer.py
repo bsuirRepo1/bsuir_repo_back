@@ -20,7 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords mismatch.")
 
         if User.objects.filter(email=attrs.get('email'), username=attrs.get('username')).exists():
-            raise serializers.ValidationError("Email already registered.")
+            raise serializers.ValidationError("User with this email or username already registered.")
 
         if User.objects.filter(email=attrs.get('email'), username=attrs.get('username'), code__isnull=False).exists():
             raise serializers.ValidationError(
