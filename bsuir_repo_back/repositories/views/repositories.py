@@ -1,18 +1,17 @@
 from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.parsers import JSONParser, MultiPartParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 
-from ..serializers.repository_serializer import RepositorySerializer, RepositoryCreateSerializer
+from ..serializers.repository_serializer import RepositoryCreateSerializer, RepositorySerializer
 from users.permissions.is_blocked import IsBlocked
-from ..models.repository import Repository
 from bsuir_repo_core.swagger_service.apply_swagger_auto_schema import apply_swagger_auto_schema
+from ..services.repositories_service import RepositoriesService
 
 
 class RepositoryViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser]
     permission_classes = [IsAuthenticated, IsBlocked]
-    serializer_class = RepositorySerializer
+    serializer_class = RepositoryCreateSerializer
 
     def get_serializer_class(self):
         if hasattr(self.request, 'method'):
@@ -24,12 +23,13 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        data = Repository.get_user_all_repositories(user_id=user.pk)
+        data = RepositoriesService.get_all_user_repositories(user_id=user.pk)
 
         return data
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        return serializer.data
 
 
 RepositoryViewSet = apply_swagger_auto_schema(

@@ -1,33 +1,19 @@
 from rest_framework import serializers
 
-from ..models.repository_file import RepositoryFile
 from ..models.repository import Repository
-
-
-class RepositoryFileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RepositoryFile
-        fields = ['file_name', 'file_url', 'content_type']
+from ..services import RepositoriesService, RepositoryFilesService
 
 
 class RepositorySerializer(serializers.ModelSerializer):
-    files = RepositoryFileSerializer(many=True, read_only=True)
+    files = serializers.SerializerMethodField()
 
     class Meta:
         model = Repository
-        fields = ['name', 'description', 'tags', 'files']
+        fields = ['id', 'name', 'tags', 'description', 'archived', 'visible', 'files']
 
-    def create(self, validated_data):
-        files = validated_data.pop('files')
-        repository = Repository.create_repository_with_files(
-            user=self.context['request'].user,
-            name=validated_data['name'],
-            description=validated_data['description'],
-            tags=validated_data['tags'],
-            files=files
-        )
-
-        return repository
+    def get_files(self, obj):
+        obj = RepositoryFilesService.get_repository_files(repository_id=obj.id)
+        return obj
 
 
 class RepositoryCreateSerializer(serializers.ModelSerializer):
@@ -35,15 +21,17 @@ class RepositoryCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Repository
-        fields = ['name', 'description', 'tags', 'files']
+        fields = ['name', 'tags', 'description', 'archived', 'visible', 'files']
 
     def create(self, validated_data):
         files = validated_data.pop('files')
-        repository = Repository.create_repository_with_files(
+        repository = RepositoriesService.create_repository(
             user=self.context['request'].user,
             name=validated_data['name'],
-            description=validated_data['description'],
             tags=validated_data['tags'],
+            description=validated_data['description'],
+            archived=validated_data['archived'],
+            visible=validated_data['visible'],
             files=files
         )
 

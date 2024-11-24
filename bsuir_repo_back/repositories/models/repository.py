@@ -1,7 +1,5 @@
 from django.db import models
 from django.core.validators import MinLengthValidator
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
 
 from users.models import User
 from common_services.mixins.audit_mixin import AuditMixin
@@ -16,7 +14,7 @@ class TagsChoices(models.TextChoices):
 
 class Repository(AuditMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='repositories')
-    files = models.F
+    files = models.ManyToManyField('RepositoryFile', related_name='repositories')
     name = models.CharField(
         max_length=70,
         validators=[MinLengthValidator(3)],
@@ -34,63 +32,5 @@ class Repository(AuditMixin):
     archived = models.BooleanField(default=False)
     visible = models.BooleanField(default=True)
 
-    @classmethod
-    def create_repository_with_files(cls, user, name, description, tags, files):
-        from .repository_file import RepositoryFile
-
-        with transaction.atomic():
-            repository = cls.objects.create(
-                user=user,
-                name=name,
-                description=description,
-                tags=tags
-            )
-            RepositoryFile.save_multiple_files(repository, files)
-
-        return repository
-
-    @classmethod
-    def get_user_all_repositories(user_id: int):
-        """
-        Метод для получения всепх репозиториев конкретного пользователя
-        """
-        return Repository.objects.filter(user=user_id).prefetch_related('files')
-
-    def get_specific_user_repository(self, user_id: int, repository_id: int):
-        """
-        Метод для получения конкретного репозитория пользователя
-        """
-        repository = Repository.objects.filter(user_id=user_id, pk=repository_id).first()
-
-        return repository
-
-    def get_specific_repository(self, repository_id: int):
-        try:
-            repository = Repository.objects.filter(id=repository_id).first()
-            if repository and not repository.archived and repository.visible:
-                return repository
-            else:
-                raise ValueError(f"Repository with id {repository_id} does not exist or archived.")
-        except Exception as e:
-            return ValueError(f"Something went wrong: {str(e)}")
-
-    def get_all_user_archive_repositories(self, user_id: int):
-        """
-        Метод для получения всех репозиториев конкретного пользователя, которые попали в архив
-        """
-        user_exists = User.objects.filter(id=user_id).exists()
-        if user_exists:
-            repositories = Repository.objects.filter(user_id=user_id, archived=True)
-            return repositories
-        else:
-            raise ValueError(f"User with id {user_id} does not exist.")
-
-    def get_specific_user_archive_repository(self, user_id: int, repository_id: int):
-        try:
-            # user = User.objects.filter(pk=user_id).first().exists()
-            repository = Repository.objects.filter(user_id=user_id, id=repository_id).first()
-            return repository
-        except ObjectDoesNotExist:
-            raise ValueError(f"User with id {user_id} does not exist.")
-        except ObjectDoesNotExist:
-            raise ValueError(f"Repository with id {repository_id} does not exist.")
+    def __str__(self):
+        return self.name
