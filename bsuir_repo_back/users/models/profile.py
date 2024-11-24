@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.mixins import AuditMixin
+from common_services.mixins.audit_mixin import AuditMixin
 
 
 class SexChoices(models.TextChoices):

@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
-from datetime import datetime
 from django.http import HttpResponse
 
 

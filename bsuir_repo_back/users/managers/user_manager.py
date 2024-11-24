@@ -1,10 +1,11 @@
-from django.contrib.auth.base_user import BaseUserManager
 from typing import Optional, Any
+import logging
+
+from django.contrib.auth.base_user import BaseUserManager
 from django.db.transaction import atomic
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractBaseUser
-import logging
 from django.db import IntegrityError
 
 logger = logging.getLogger(__name__)

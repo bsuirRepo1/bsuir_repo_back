@@ -1,7 +1,8 @@
 import inspect
+from typing import List, Optional, Type, Callable, Any
+
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
-from typing import List, Optional, Type, Callable, Any
 from django.views import View
 
 EXCLUDE_METHODS = {

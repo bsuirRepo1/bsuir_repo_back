@@ -1,10 +1,20 @@
+import os
+from datetime import timedelta
+
 from pathlib import Path
 from decouple import config
-from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(BASE_DIR, 'service_account.json')
+
+GS_BUCKET_NAME = config('GS_BUCKET_NAME')
+GS_PROJECT_ID = config('GS_PROJECT_ID')
+
+MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/media/"
+STATIC_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/static/"
 
 DEBUG = True
 
@@ -22,6 +32,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "users.apps.UsersConfig",
+    "repositories.apps.RepositoriesConfig",
 ]
 
 MIDDLEWARE = [
