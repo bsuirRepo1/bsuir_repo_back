@@ -42,14 +42,3 @@ class EmailService:
             )
         except Exception as e:
             print(e)
-
-    def send_custom_message(self, email: str, subject: str, message: str):
-        try:
-            send_mail(
-                subject,
-                message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-            )
-        except Exception as e:
-            print(e)
