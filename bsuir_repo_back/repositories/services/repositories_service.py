@@ -1,9 +1,10 @@
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import PermissionDenied
 
 from .repository_files_service import RepositoryFilesService
 from ..models import Repository
 from users.models import User
+from common_services.exceptions import UserNotFoundException, RepositoryNotFoundException
 
 
 class RepositoriesService:
@@ -32,11 +33,27 @@ class RepositoriesService:
             raise e
 
     @staticmethod
-    def get_all_user_repositories(user_id: int):
+    def get_all_repositories():
+        return Repository.objects.select_related('user').prefetch_related('files').filter(visible=True, archived=False)
+
+    @staticmethod
+    def get_user_repositories(user_id: int):
         if not user_id:
             raise ValueError("User ID is required field.")
         if User.objects.filter(id=user_id).exists():
-            repositories = Repository.objects.filter(user=user_id)
+            repositories = Repository.objects.filter(user=user_id, visible=True, archived=False)
             return repositories
         else:
-            raise ObjectDoesNotExist("User does not exist.")
+            raise UserNotFoundException(user_id=user_id)
+
+    @staticmethod
+    def get_repository(repository_id: int):
+        if not repository_id:
+            raise ValueError("Repository ID is required field.")
+        try:
+            if Repository.objects.filter(id=repository_id, visible=True, archived=False).exists():
+                return Repository.objects.get(id=repository_id)
+            else:
+                raise PermissionDenied("Repository is visible or archived but not found.")
+        except RepositoryNotFoundException:
+            raise RepositoryNotFoundException(repository_id=repository_id)

@@ -174,7 +174,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         "users.services.auth_service.CustomAuthentication",
     ),
-
+    'EXCEPTION_HANDLER': 'common_services.exceptions.exceptions_handler.custom_exception_handler'
 }
 
 SIMPLE_JWT = {
